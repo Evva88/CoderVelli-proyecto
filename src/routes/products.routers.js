@@ -53,16 +53,16 @@ productsRouter.get("/:pid", async (req, res) => {
 });
 
 productsRouter.post("/", async (req, res) => {
-  let { title, description, code, price, status, stock, category, thumbnail } = req.body;
-  console.log("Received thumbnail:", thumbnail);
+  let { nombre, detalle, code, precio, status, stock, categoria, img } = req.body;
+  console.log("Received thumbnail:", img);
 
-  if (!title) {
-    res.status(400).send({ status: "error", message: "Error! No se cargó el campo Title!" });
+  if (!nombre) {
+    res.status(400).send({ status: "error", message: "Error! No se cargó el campo Nombre!" });
     return false;
   }
 
-  if (!description) {
-    res.status(400).send({ status: "error", message: "Error! No se cargó el campo Description!"});
+  if (!detalle) {
+    res.status(400).send({ status: "error", message: "Error! No se cargó el campo Detalle!"});
     return false;
   }
 
@@ -71,8 +71,8 @@ productsRouter.post("/", async (req, res) => {
     return false;
   }
 
-  if (!price) {
-    res.status(400).send({ status: "error", message: "Error! No se cargó el campo Price!" });
+  if (!precio) {
+    res.status(400).send({ status: "error", message: "Error! No se cargó el campo Precio!" });
     return false;
   }
 
@@ -83,21 +83,21 @@ productsRouter.post("/", async (req, res) => {
     return false;
   }
 
-  if (!category) {
-    res.status(400).send({status: "error",message: "Error! No se cargó el campo Category!"});
+  if (!categoria) {
+    res.status(400).send({status: "error",message: "Error! No se cargó el campo Categoria!"});
     return false;
   }
 
-  if (!thumbnail) {
-    res.status(400).send({status: "error",message: "Error! No se cargó el campo Thumbnail!",});
+  if (!img) {
+    res.status(400).send({status: "error",message: "Error! No se cargó el campo Imagen!",});
     return false;
   }
   try {
-    const wasAdded = await PM.addProduct({title,description,code,price,status,stock,category,thumbnail});
+    const wasAdded = await PM.addProduct({nombre,detalle,code,precio,status,stock,categoria,img});
 
     if (wasAdded && wasAdded._id) {
       res.send({status: "ok",message: "El Producto se agregó correctamente!"});
-      socketServer.emit("product_created", { _id: wasAdded._id,title,description,code,price,status,stock,category,thumbnail});
+      socketServer.emit("product_created", { _id: wasAdded._id,nombre,detalle,code,precio,status,stock,categoria,img});
     } else {
       res.status(500).send({status: "error", message: "Error! No se pudo agregar el Producto!"});
     }
@@ -108,11 +108,11 @@ productsRouter.post("/", async (req, res) => {
 
 
 productsRouter.put("/:pid", async (req, res) => {
-  let { title, description, code, price, status, stock, category, thumbnail } = req.body;
+  let { nombre, detalle, code, precio, status, stock, categoria, img } = req.body;
 
   try {
     const pid = req.params.pid;
-    const wasUpdated = await PM.updateProduct(pid, {title,description,code,price,status,stock,category,thumbnail});
+    const wasUpdated = await PM.updateProduct(pid, {nombre,detalle,code,precio,status,stock,categoria,img});
     if (wasUpdated) {
       res.send({status: "ok",message: "El Producto se actualizó correctamente!"});
       socketServer.emit("product_updated");

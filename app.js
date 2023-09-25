@@ -12,7 +12,7 @@ import { allowInsecurePrototypeAccess } from "@handlebars/allow-prototype-access
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import morgan from "morgan";
-import { initializePassport, passportSession } from "./src/midsIngreso/passport.js"
+import initializePassport from "./src/midsIngreso/passport.js"
 import initializeGitHubPassport from "./src/midsIngreso/github.js";
 import passport from "passport";
 import cookieParser from "cookie-parser";
@@ -50,13 +50,16 @@ app.use(cookieParser(CARAMELO_DE_LIMON));
 app.use(session({
   store: new MongoStore({
       mongoUrl: MONGODB_CNX_STR,
+      collectionName:"sessions",
       ttl: 3600
   }),
   secret: "CARAMELO_DE_LIMON",
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {secure:false}
 }))
-initializeGitHubPassport();    app.use(initializePassport, passportSession);
+initializeGitHubPassport();    
+initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(__dirname+"/src/public"));
@@ -68,7 +71,6 @@ app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
 app.use("/api/sessions/", sessionsRouter);
 app.use("/", viewsRouter);
-app.use(errorHandler);
 
 
 import ProductManager from "./src/dao/ProductManager.js";
@@ -79,8 +81,6 @@ const MM = new MessagesManager();
 
 import CartManager from "./src/dao/cartManager.js";
 const CM = new CartManager();
-
-
 
 socketServer.on("connection", async (socket) => {
   console.log("Un cliente se ha conectado");

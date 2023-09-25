@@ -57,7 +57,7 @@ router.get("/products/:pid", async (req, res) => {
 
 
 router.get("/cart", async (req, res) => {
-  const cid = req.params.cid;
+  const cid = req.params.cid;3
   const cart = await CM.getCart(cid);
 
   res.render("cart", { products: cart.products });
@@ -95,6 +95,13 @@ router.get("/restore", checkSession, (req, res) => {
   res.render("restore");
 });
 
+router.get("/faillogin", (req, res) =>{
+  res.status(401).json({
+      status:"error",
+      message: "Error en el ingreso al sitio con ese mail y contraseña"
+  });
+
+})
 
 
 export default router;

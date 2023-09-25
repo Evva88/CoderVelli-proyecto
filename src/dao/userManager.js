@@ -1,8 +1,8 @@
 import usersModel from "./models/user.model.js";
+import { isValidPassword } from "../midsIngreso/bcrypt.js";
 
 class UserManager {
-   
-    async addUser(user) {
+     async addUser(user) {
         try {
             if(user.email == "adminCoder@coder"){
                 ures.rol= "admin"
@@ -17,44 +17,31 @@ class UserManager {
         }
     }
     
-    async login(user) {
+    async login(user, pass, req) {
         try {
-            const userLogged =  (await usersModel.findOne({ email: user, password: pass })) || null;
-            
-            if (userLogged) {
-                if (userLogged) {
-        const rol =
-          userLogged.email === "adminCoder@coder.com" ? "admin" : "usuario";
-
-        req.session.user = {
-          id: userLogged._id,
-          email: userLogged.email,
-          first_name: userLogged.first_name,
-          last_name: userLogged.last_name,
-          rol: rol,
-        };
-
-        console.log(
-          "Valor de req.session.user después de la autenticación:",
-          req.session.user
-        );
-
-        const userToReturn = userLogged;
-        console.log("Valor de userToReturn:", JSON.stringify(userToReturn));
-        return userToReturn;
-      }
-      console.log(
-        "Valor de userLogged antes de devolver falso:",
-        JSON.stringify(userLogged)
-      );
-      return false;
-            }
-
-            return false;
+          const userLogged = await usersModel.findOne({ email: user });
+    
+          if (userLogged && isValidPassword(userLogged, pass)) {
+            const rol =
+              userLogged.email === "adminCoder@coder.com" ? "admin" : "usuario";
+    
+            req.session.user = {
+              id: userLogged._id,
+              email: userLogged.email,
+              first_name: userLogged.first_name,
+              last_name: userLogged.last_name,
+              rol: rol,
+            };
+    
+            const userToReturn = userLogged;
+            return userToReturn;
+          }
+          return false;
         } catch (error) {
-            return false;
+          console.error("Error durante el login:", error);
+          return false;
         }
-    }
+      }
    
     
     async getUserByEmail(user) {
