@@ -50,18 +50,27 @@ router.get("/products", async (req, res) => {
 router.get("/products/:pid", async (req, res) => {
   const pid = req.params.pid;
   const product = await PM.getProductById(pid);
-
+  if (product){
   res.render("productDetail", { product });
-
+  } else {
+    res.status(404).send({status:"error", message:"Producto no encontrado"})
+  }
 });
 
 
-router.get("/cart", async (req, res) => {
-  const cid = req.params.cid;3
+router.get("/carts/:cid", async (req, res) => {
+  const cid = req.params.cid;
   const cart = await CM.getCart(cid);
 
-  res.render("cart", { products: cart.products });
- 
+  if (cart) {
+    console.log(JSON.stringify(cart, null, 4));
+    res.render("cart", { products: cart.products });
+  } else {
+    res.status(400).send({
+      status: "error",
+      message: "Error! No se encuentra el ID de Carrito!",
+    });
+  }
 });
 
 

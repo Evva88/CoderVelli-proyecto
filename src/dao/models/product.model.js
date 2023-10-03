@@ -3,13 +3,13 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 const productSchema = new mongoose.Schema({
   id: Number,
-  nombre: String,
-  detalle: String,
-  precio: Number,
+  title: String,
+  description: String,
+  price: Number,
   code: String,
   stock: Number,
-  categoria: String,
-  img: String,
+  category: String,
+  thumbnail: String,
 });
 
 productSchema.plugin(mongoosePaginate);

@@ -5,9 +5,9 @@ const userSchema = new mongoose.Schema({
     last_name:String,
     email:{type: String, unique:true},
     age:Number,
-    password:{type:String},
-    cart: String,
-    rol:{type: String, default: "usuario"}
+    password:String,
+    cart: {type:String, ref:"carts"},
+    rol:String
 });
 const usersModel = mongoose.model("users", userSchema);
 export default usersModel;

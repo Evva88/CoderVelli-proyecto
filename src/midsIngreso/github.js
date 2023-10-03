@@ -1,35 +1,26 @@
 import passport from "passport";
 import GitHubStrategy from "passport-github2";
 import usersModel from "../dao/models/user.model.js"
-
+import { CLIENT_ID_GITHUB, CLIENT_SECRET_GITHUB } from "../config/configs.js";
+import AuthenticationService from "../services/auth.service.js";
 
 
 const initializeGitHubPassport = () => {
     
     passport.use("github", new GitHubStrategy({
-        clientID:"d74f1894669cb0631f8a",
-        clientSecret:"cb4771aeebbc895266e60b00befa310d49a30ea9",
+        clientID: CLIENT_ID_GITHUB,
+        clientSecret:CLIENT_SECRET_GITHUB,
         callbackURL:"http://localhost:8080/api/sessions/githubcallback"
     }, async (accessToken, refreshToken, profile, done) => {
         try {
-            console.log(profile);
-            let user = await usersModel.findOne({email:profile._json.email});
+            const authService = new AuthenticationService();
+            console.log("Perfil: ", JSON.stringify(profile, null, 2));
+            const user = await authService.githubCallback(profile);
 
             if (user) {
                 return done(null, user);
             } else {
-                let newUser = { 
-                    first_name:profile._json.name,
-                    last_name:"",
-                    email:profile._json.email,
-                    age:100,
-                    password:""
-                    
-                    
-                }
-                let result = await usersModel.create(newUser);
-
-                return done(null, result);
+                return done(null, false);
             }
         } catch(error) {
             return done(error);

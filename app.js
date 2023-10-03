@@ -16,8 +16,8 @@ import initializePassport from "./src/midsIngreso/passport.js"
 import initializeGitHubPassport from "./src/midsIngreso/github.js";
 import passport from "passport";
 import cookieParser from "cookie-parser";
-import { errorHandler } from "./src/errors/errorHandler.js";
-import {CARAMELO_DE_LIMON, MONGODB_CNX_STR, PORT  } from "./src/config/configs.js"
+//import { errorHandler } from "./src/errors/errorHandler.js";
+import { MONGODB_CNX_STR, PORT  } from "./src/config/configs.js"
 
 
 const app = express();
@@ -45,7 +45,7 @@ app.set("views", __dirname + "/views");
 app.set("view engine", "handlebars");
 app.use(express.static(__dirname));
 
-app.use(cookieParser(CARAMELO_DE_LIMON));
+app.use(cookieParser());
 
 app.use(session({
   store: new MongoStore({
@@ -83,7 +83,7 @@ import CartManager from "./src/dao/cartManager.js";
 const CM = new CartManager();
 
 socketServer.on("connection", async (socket) => {
-  console.log("Un cliente se ha conectado");
+  console.log("Un cliente conectado");
 
   const allProducts = await PM.getProducts();
   socket.emit("initial_products", allProducts);
