@@ -10,19 +10,14 @@ const UM = new userManager();
 const userController = new UserController();
 const authControl = new AuthControl();
 
-//Login
 router.post("/login",(req,res) => authControl.login(req, res));
 
-//Registro
 router.post("/register", userController.register.bind(userController));
 
-//Logout
 router.post("/logout", (req, res) => authControl.logout(req, res));
 
-//Restore
 router.get("/restore", userController.restore.bind(userController));
 
-//GitHub
 router.get("/github", passport.authenticate("github", {scope:["user:email"]}), async (req, res) => {});
 
 router.get("/githubcallback", passport.authenticate("github", {failureRedirect:"/login"}), async (req, res) => {
@@ -31,7 +26,6 @@ router.get("/githubcallback", passport.authenticate("github", {failureRedirect:"
     res.redirect("/profile");
 });
 
-//Current
 router.get("/current", passportCall("jwt"), authorization("user"), (req, res) => {
   userController.current(req,res)
 });

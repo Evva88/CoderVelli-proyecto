@@ -8,6 +8,8 @@ import cartsRouter from "./src/routes/cart.routers.js";
 import productsRouter from "./src/routes/products.routers.js";
 import sessionsRouter from "./src/routes/session.routers.js";
 import viewsRouter from "./src/routes/views.routers.js";
+import emailRouter from "./src/routes/email.routes.js";
+import smsRouter from "./src/routes/sms.routers.js"
 import { allowInsecurePrototypeAccess } from "@handlebars/allow-prototype-access";
 import session from "express-session";
 import MongoStore from "connect-mongo";
@@ -16,8 +18,9 @@ import initializePassport from "./src/midsIngreso/passport.js"
 import initializeGitHubPassport from "./src/midsIngreso/github.js";
 import passport from "passport";
 import cookieParser from "cookie-parser";
-//import { errorHandler } from "./src/errors/errorHandler.js";
-import { MONGODB_CNX_STR, PORT  } from "./src/config/configs.js"
+import { MONGODB_CNX_STR, PORT  } from "./src/config/configs.js";
+import "./src/dao/dbConfig.js";
+
 
 
 const app = express();
@@ -53,7 +56,7 @@ app.use(session({
       collectionName:"sessions",
       ttl: 3600
   }),
-  secret: "CARAMELO_DE_LIMON",
+  secret: "SECRET_SESSIONS",
   resave: false,
   saveUninitialized: false,
   cookie: {secure:false}
@@ -70,6 +73,8 @@ app.use(morgan('dev'))
 app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
 app.use("/api/sessions/", sessionsRouter);
+app.use("/api/email", emailRouter);
+app.use("/api/sms", smsRouter);
 app.use("/", viewsRouter);
 
 

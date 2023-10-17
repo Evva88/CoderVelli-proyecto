@@ -1,8 +1,8 @@
 import { cartModel } from "./models/cart.model.js";
 import mongoose from "mongoose";
+import { ticketModel } from "./models/ticket.model.js";
 
 class CartManager {
-
   async newCart() {
     let cart = await cartModel.create({ products: [] });
     console.log("Cart created!");
@@ -12,41 +12,35 @@ class CartManager {
       id: cart._id,
     };
   }
- 
-  async getCart(id) {
-    if (this.validateId(id)) {
-      return (await cartModel.findOne({ _id: id }).lean()) || null;
-    } else {
-      console.log("Not found!");
 
-      return null;
-    }
+  async getCart(id) {
+    return (await cartModel.findOne({ _id: id }).lean()) || null;
   }
- 
+
   async getCarts() {
     return await cartModel.find().lean();
   }
- 
+
   async addProductToCart(cid, pid) {
     try {
       console.log(`Adding product ${pid} to cart ${cid}`);
-  
+
       if (mongoose.Types.ObjectId.isValid(cid) && mongoose.Types.ObjectId.isValid(pid)) {
-          const updateResult = await cartModel.updateOne(
+        const updateResult = await cartModel.updateOne(
           { _id: cid, "products.product": pid },
           { $inc: { "products.$.quantity": 1 } }
         );
-        
+
         console.log("Update result:", updateResult);
-          if (updateResult.matchedCount === 0) {
+        if (updateResult.matchedCount === 0) {
           const pushResult = await cartModel.updateOne(
             { _id: cid },
             { $push: { products: { product: pid, quantity: 1 } } }
           );
-          
+
           console.log("Push result:", pushResult);
         }
-  
+
         return {
           status: "ok",
           message: "El producto se agregó correctamente!",
@@ -65,8 +59,7 @@ class CartManager {
       };
     }
   }
-  
-  
+ 
   async updateQuantityProductFromCart(cid, pid, quantity) {
     try {
       if (this.validateId(cid)) {
@@ -108,7 +101,7 @@ class CartManager {
     }
   }
   
-  
+ 
   async deleteProductsFromCart(cid) {
     try {
       if (this.validateId(cid)) {
@@ -128,8 +121,19 @@ class CartManager {
     }
   }
 
+ 
+  async purchase(req, res) {
+    try {
+      const { cid } = req.params;
+      const cart = await this.getCart(cid);
+      if (!cart) {
+      }
+    } catch (error) {
+    }
+  }
+
   validateId(id) {
-    return id.length === 24 ? true : false;
+    return id.length === 24 ? true : false; 
   }
 }
 

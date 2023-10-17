@@ -1,5 +1,6 @@
 import { isValidPassword, createHash } from "../midsIngreso/bcrypt.js";
 import usersModel from "./models/user.model.js";
+import UserDto from "./dtos/user.dto.js";
 
 class UserManager {
     async addUser({first_name, last_name, email, age, password, rol}) {
@@ -21,7 +22,7 @@ class UserManager {
             });
            
             console.log("Usuario agregado", user);
-            return user;
+            return new UserDto(user); 
         } catch (error) {
             console.error("Error al agregar al usuario ", error);
             throw error;
@@ -33,18 +34,15 @@ class UserManager {
           const userLogged = await usersModel.findOne({ email: user });
     
           if (userLogged && isValidPassword(userLogged, pass)) {
-            const rol =
-              userLogged.email === "adminCoder@coder.com" ? "admin" : "usuario";
-    
-            return userLogged;
-          }
+            return new UserDto(userLogged); 
+        }
           return null;
         } catch (error) {
-          console.error("Error durante el login:", error);
+          console.error("Error during login:", error);
           throw error;
         }
       }
-    
+   
     async getUserByEmail(user) {
         try {
             const userRegisteredBefore= await usersModel.findOne([{email:user}]) || null;
@@ -75,7 +73,7 @@ class UserManager {
         }
     }
     
-    
+  
     async obtenerSegunCampo({campo,valor}) {
         const criterio = {}
         criterio[campo] = valor
