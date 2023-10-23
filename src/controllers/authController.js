@@ -13,23 +13,23 @@ class AuthController {
   }
 
   async login(req, res, next) {
-   try {
-    console.log("Login request received:", req.body);
-
-    const { email, password } = req.body;
-    const userData = await this.authService.login(email, password);
-    console.log("User data retrieved:", userData);
-
-    if (!userData || !userData.user) {
-      console.log("Invalid credentials");
-      const customeError = new CustomeError({
-        name: "Auth Error",
-        message: "Credenciales invalidas",
-        code:401,
-        cause: authError(email),
-      });
-      return next(customeError)
-    }
+    try {
+     console.log("Login request received:", req.body);
+ 
+     const { email, password } = req.body;
+     const userData = await this.authService.login(email, password);
+     console.log("User data retrieved:", userData);
+ 
+     if (!userData || !userData.user) {
+       console.log("Invalid credentials");
+       const customeError = new CustomeError({
+         name: "Auth Error",
+         message: "Credenciales invalidas",
+         code:401,
+         cause: authError(email),
+       });
+       return next(customeError)
+     }
     
 
     if (userData && userData.user) {

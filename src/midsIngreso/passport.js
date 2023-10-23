@@ -37,7 +37,7 @@ const initializePassport = ()=>{
             console.log("Asignando rol de usuario");
             user.role = 'user';
           }
-          console.log("Rol después de la asignación:", user.rol);
+          console.log("Rol después de la asignación:", user.role);
           let result = await usersModel.create(user);
           console.log("Usuario después de guardar:", result);
           if (result) {

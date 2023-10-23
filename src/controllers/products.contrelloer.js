@@ -55,26 +55,26 @@ class ProductController {
 
   async addProduct(req, res) {
     let {
-      title,
-      description,
+      nombre,
+      detalle,
       code,
-      price,
+      precio,
       status,
       stock,
-      category,
-      thumbnail,
+      categoria,
+      img,
     } = req.body;
-    console.log("Received thumbnail:", thumbnail);
+    console.log("Received thumbnail:", img);
 
-    if (!title) {
+    if (!nombre) {
       res.status(400).send({
         status: "error",
-        message: "Error! No se cargó el campo Title!",
+        message: "Error! No se cargó el campo nombre!",
       });
       return false;
     }
 
-    if (!description) {
+    if (!detalle) {
       res.status(400).send({
         status: "error",
         message: "Error! No se cargó el campo Description!",
@@ -90,10 +90,10 @@ class ProductController {
       return false;
     }
 
-    if (!price) {
+    if (!precio) {
       res.status(400).send({
         status: "error",
-        message: "Error! No se cargó el campo Price!",
+        message: "Error! No se cargó el campo Precio!",
       });
       return false;
     }
@@ -108,31 +108,31 @@ class ProductController {
       return false;
     }
 
-    if (!category) {
+    if (!categoria) {
       res.status(400).send({
         status: "error",
-        message: "Error! No se cargó el campo Category!",
+        message: "Error! No se cargó el campo categoria!",
       });
       return false;
     }
 
-    if (!thumbnail) {
+    if (!img) {
       res.status(400).send({
         status: "error",
-        message: "Error! No se cargó el campo Thumbnail!",
+        message: "Error! No se cargó el campo img!",
       });
       return false;
     }
     try {
       const wasAdded = await this.productService.addProduct({
-        title,
-        description,
+        nombre,
+        detalle,
         code,
-        price,
+        precio,
         status,
         stock,
-        category,
-        thumbnail,
+        categoria,
+        img,
       });
 
       if (wasAdded && wasAdded._id) {
@@ -143,14 +143,14 @@ class ProductController {
         });
         socketServer.emit("product_created", {
           _id: wasAdded._id,
-          title,
-          description,
+          nombre,
+          detalle,
           code,
-          price,
+          precio,
           status,
           stock,
-          category,
-          thumbnail,
+          categoria,
+          img,
         });
         return;
       } else {
@@ -173,26 +173,26 @@ class ProductController {
   async updateProduct(req, res) {
     try {
       const {
-        title,
-        description,
+        nombre,
+        detalle,
         code,
-        price,
+        precio,
         status,
         stock,
-        category,
-        thumbnail,
+        categoria,
+        img,
       } = req.body;
       const pid = req.params.pid;
 
       const wasUpdated = await this.productService.updateProduct(pid, {
-        title,
-        description,
+        nombre,
+        detalle,
         code,
-        price,
+        precio,
         status,
         stock,
-        category,
-        thumbnail,
+        categoria,
+        img,
       });
 
       if (wasUpdated) {
