@@ -1,10 +1,10 @@
 const loginUser = async () => {
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   try {
-    const response = await fetch("/api/sessions/login/", {
-      method: "POST",
+    const response = await fetch("/api/sessions/login", {
+      method: "POST",  // Cambiar a POST el GET no funciona
       headers: { "Content-type": "application/json; charset=UTF-8" },
       body: JSON.stringify({ email: email, password: password }),
     });
@@ -21,4 +21,5 @@ const loginUser = async () => {
     console.log("Hubo un problema con la operación, usuario o contraseña incorrectos", error);
   }
 };
+
 document.getElementById("btnLogIn").onclick = loginUser;

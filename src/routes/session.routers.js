@@ -1,33 +1,45 @@
-import express  from "express";
-import userManager from "../dao/userManager.js";
+import express from "express";
+import UserManager from "../dao/userManager.js";
 import passport from "passport";
 import { passportCall, authorization } from "../midsIngreso/passAuth.js";
 import UserController from "../controllers/userController.js";
-import AuthControl from "../controllers/authController.js";
+import AuthController from "../controllers/authController.js";
+import errorHandler from "../services/errors/errorsHandler.js";
 
-const router = express.Router();
-const UM = new userManager();
+const PRIVATE_KEY = "CARAMELO_DE_LIMON";
+
+const serviceRouter = express.Router();
+const UM = new UserManager();
 const userController = new UserController();
-const authControl = new AuthControl();
+const authController = new AuthController();
 
-router.post("/login",(req,res) => authControl.login(req, res));
+serviceRouter.post("/login", (req, res) => authController.login(req, res));
 
-router.post("/register", userController.register.bind(userController));
+serviceRouter.post("/register", userController.register.bind(userController));
 
-router.post("/logout", (req, res) => authControl.logout(req, res));
+serviceRouter.get("/restore", userController.restorePassword.bind(userController));
 
-router.get("/restore", userController.restore.bind(userController));
+serviceRouter.get(
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"] }),
+  async (req, res) => {}
+);
 
-router.get("/github", passport.authenticate("github", {scope:["user:email"]}), async (req, res) => {});
+serviceRouter.get(
+  "/githubcallback",
+  passport.authenticate("github", { failureRedirect: "/login" }),
+  (req, res) => {
+    console.log("GitHub Callback Route");
+    authController.githubCallback(req, res);
+  }
+);
+serviceRouter.post("/logout", (req, res) => authController.logout(req, res));
 
-router.get("/githubcallback", passport.authenticate("github", {failureRedirect:"/login"}), async (req, res) => {
-    req.session.user = req.user;
-    req.session.loggedIn = true;
-    res.redirect("/profile");
+serviceRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => {
+  console.log(req.cookies); 
+  userController.currentUser(req, res);
 });
 
-router.get("/current", passportCall("jwt"), authorization("user"), (req, res) => {
-  userController.current(req,res)
-});
+serviceRouter.use(errorHandler);
 
-export default router;
+export default serviceRouter;

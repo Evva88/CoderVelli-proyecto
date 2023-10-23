@@ -18,7 +18,7 @@ class Criptografia {
         jwt.sign(dato, JWT_SECRET, {expiresIn: "1h"})
     }
 
-    //Decodifica el token
+    //Decodifica token
     decodificarToken(token) {
         return jwt.verify(token, JWT_SECRET)
     }

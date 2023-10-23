@@ -1,23 +1,22 @@
 import { Router } from "express";
 import ProductManager from "../dao/ProductManager.js";
-import productControl from "../controllers/products.contrelloer.js";
+import ProductsServices from "../services/products.service.js";
+import productsController from "../controllers/products.contrelloer.js";
+import { authorization, passportCall } from "../midsIngreso/passAuth.js";
+import errorHandler from "../services/errors/errorsHandler.js";
 
 const productsRouter = Router();
 const PM = new ProductManager();
+const productService = new ProductsServices();
 
-//consigue productos
-productsRouter.get("/", productControl.getProducts.bind(productControl));
+productsRouter.get("/", passportCall('jwt'), authorization(['admin']), productsController.getProducts.bind(productsController));
+productsRouter.get(
+  "/:pid",
+  productsController.getProductById.bind(productsController)
+);
+productsRouter.post('/', passportCall('jwt'), authorization(['admin']), productsController.addProduct.bind(productsController));
+productsRouter.put('/:pid',passportCall('jwt'), authorization(['admin']), productsController.updateProduct.bind(productsController));
+productsRouter.delete('/:pid',passportCall('jwt'), authorization(['admin']), productsController.deleteProduct.bind(productsController));
 
-//encuentra el producto por su ID
-productsRouter.get("/:pid", productControl.getByID.bind(productControl));
-
-//nuevo producto
-productsRouter.post("/", productControl.addProduct.bind(productControl));
-
-//modifica un objeto por su ID
-productsRouter.put("/:pid", productControl.updateProd.bind(productControl));
-
-//borra producto
-productsRouter.delete("/:pid", productControl.deleteProd.bind(productControl));
-
+productsRouter.use(errorHandler);
 export default productsRouter;

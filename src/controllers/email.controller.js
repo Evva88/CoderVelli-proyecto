@@ -22,13 +22,13 @@ const transporter = nodemailer.createTransport({
     }
   });
   
-  const mailOptions = {
-    from: "Coder Test " + GMAIL_USER,
-    to: GMAIL_USER,
-    subject: "Correo de prueba Coder.",
+ const mailOptions = {
+   from: "Coder Test " + GMAIL_USER,
+   to: GMAIL_USER,
+   subject: "Correo de prueba Coder.",
     html: "<div><h1>Esto es un Test de envio de correos con Nodemailer!</h1></div>",
     attachments: [],
-  };
+ };
   
   const mailOptionsWithAttachments = {
     from: "Coder Test " + GMAIL_USER,
@@ -42,13 +42,13 @@ const transporter = nodemailer.createTransport({
     attachments: [
       {
         filename: "Tu Previa",
-        path: __dirname+'/src/public/images/logo3.jpg',
+        path: __dirname+'/public/images/logo3.jpg',
         cid: "logo",
       },
     ],
   };
   
-  export const sendEmail = (req, res) => {
+ export const sendEmail = (req, res) => {
     try {
       let result = transporter.sendMail(mailOptions, (error, info) => {
         if (error) {

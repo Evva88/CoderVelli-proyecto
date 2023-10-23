@@ -1,11 +1,14 @@
 import { cartModel } from "./models/cart.model.js";
 import mongoose from "mongoose";
-import { ticketModel } from "./models/ticket.model.js";
+import ProductManager from "./ProductManager.js";
 
 class CartManager {
+  constructor() {
+    this.productManager = new ProductManager();
+  }
   async newCart() {
     let cart = await cartModel.create({ products: [] });
-    console.log("Cart created!");
+    console.log("Cart created:", cart);
     return {
       status: "ok",
       message: "El Carrito se creó correctamente!",
@@ -14,18 +17,43 @@ class CartManager {
   }
 
   async getCart(id) {
-    return (await cartModel.findOne({ _id: id }).lean()) || null;
+    if (this.validateId(id)) {
+      return (await cartModel.findOne({ _id: id }).lean()) || null;
+    } else {
+      console.log("Not found!");
+
+      return null;
+    }
   }
 
   async getCarts() {
     return await cartModel.find().lean();
   }
 
-  async addProductToCart(cid, pid) {
+  async addProductToCart(cid, pid, quantity) {
     try {
       console.log(`Adding product ${pid} to cart ${cid}`);
 
-      if (mongoose.Types.ObjectId.isValid(cid) && mongoose.Types.ObjectId.isValid(pid)) {
+      if (
+        mongoose.Types.ObjectId.isValid(cid) &&
+        mongoose.Types.ObjectId.isValid(pid)
+      ) {
+        const product = await this.productManager.getProductById(pid);
+
+        console.log("Stock antes de agregar al carrito:", product.stock);
+
+        if (!product) {
+          console.log("Product not found!");
+          return {
+            status: "error",
+            message: "Producto no encontrado!",
+          };
+        }
+
+        if (product.stock < quantity) { 
+          return { status: "error", message: "Stock insuficiente!" };
+      }
+
         const updateResult = await cartModel.updateOne(
           { _id: cid, "products.product": pid },
           { $inc: { "products.$.quantity": 1 } }
@@ -59,49 +87,93 @@ class CartManager {
       };
     }
   }
- 
+
   async updateQuantityProductFromCart(cid, pid, quantity) {
     try {
       if (this.validateId(cid)) {
         const cart = await this.getCart(cid);
-        const product = cart.products.find((item) => item.product === pid);
-        product.quantity = quantity;
+        if (!cart) {
+          console.log("Cart not found!");
+          return false;
+        }
 
-        await cartModel.updateOne({ _id: cid }, { products: cart.products });
-        console.log("Product updated!");
+        console.log("PID:", pid);
+        console.log(
+          "Cart products:",
+          cart.products.map((item) =>
+            item.product._id
+              ? item.product._id.toString()
+              : item.product.toString()
+          )
+        );
 
-        return true;
+        const product = cart.products.find(
+          (item) =>
+            (item.product._id
+              ? item.product._id.toString()
+              : item.product.toString()) === pid.toString()
+        );
+
+        if (product) {
+          product.quantity = quantity;
+
+          await cartModel.updateOne({ _id: cid }, { products: cart.products });
+          console.log("Product updated!");
+
+          return true;
+        } else {
+          console.log("Product not found in cart");
+          return false;
+        }
       } else {
-        console.log("Not found!");
-
+        console.log("Invalid cart ID!");
         return false;
       }
     } catch (error) {
+      console.error("Error while updating product:", error);
       return false;
     }
   }
-  
+
+  async updateProducts(cid, products) {
+    try {
+      await cartModel.updateOne(
+        { _id: cid },
+        { products: products },
+        { new: true, upsert: true }
+      );
+      console.log("Product updated!");
+
+      return true;
+    } catch (error) {
+      console.log("Not found!");
+
+      return false;
+    }
+  }
+
   async deleteProductFromCart(cid, pid) {
     try {
-      if (this.validateId(cid)) {
-        const cart = await this.getCart(cid);
-        const products = cart.products.filter((item) => item.product !== pid);
+      if (mongoose.Types.ObjectId.isValid(cid)) {
+        const updateResult = await cartModel.updateOne(
+          { _id: cid },
+          { $pull: { products: { product: pid } } }
+        );
 
-        await cartModel.updateOne({ _id: cid }, { products: products });
-        console.log("Product deleted!");
-
-        return true;
+        if (updateResult.matchedCount > 0) {
+          console.log("Product deleted!");
+          return true;
+        }
       } else {
-        console.log("Not found!");
-
+        console.log("Invalid cart ID!");
         return false;
       }
     } catch (error) {
+      console.error(error);
       return false;
     }
   }
-  
- 
+
   async deleteProductsFromCart(cid) {
     try {
       if (this.validateId(cid)) {
@@ -109,31 +181,19 @@ class CartManager {
 
         await cartModel.updateOne({ _id: cid }, { products: [] });
         console.log("Products deleted!");
-
         return true;
       } else {
         console.log("Not found!");
-
         return false;
       }
     } catch (error) {
+      console.error(error);
       return false;
     }
   }
 
- 
-  async purchase(req, res) {
-    try {
-      const { cid } = req.params;
-      const cart = await this.getCart(cid);
-      if (!cart) {
-      }
-    } catch (error) {
-    }
-  }
-
   validateId(id) {
-    return id.length === 24 ? true : false; 
+    return mongoose.Types.ObjectId.isValid(id);
   }
 }
 

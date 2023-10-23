@@ -1,25 +1,29 @@
 import { Router } from "express";
 import CartManager from "../dao/cartManager.js";
-import cartsControl from "../controllers/cart.controller.js";
+import cartsController from "../controllers/cart.controller.js";
+import { authorization, passportCall } from "../midsIngreso/passAuth.js";
 
 const cartsRouter = Router();
 const CM = new CartManager();
 
-//nuevo carrito
-cartsRouter.post("/", cartsControl.createNewCart.bind(cartsControl));
+cartsRouter.post("/", cartsController.createCart.bind(cartsController));
 
-//busca carrito por su ID
-cartsRouter.get("/:cid", cartsControl.getThisCart.bind(cartsControl));
+cartsRouter.get("/:cid", cartsController.getCart.bind(cartsController));
 
-//agrega el producto 
-cartsRouter.post("/:cid/products/:pid", cartsControl.addProduct.bind(cartsControl));
+cartsRouter.post("/:cid/products/:pid", passportCall('jwt'), authorization(['user']), cartsController.addProductToCart.bind(cartsController));
 
-//producto actualizado por su ID
-cartsRouter.put("/:cid/products/:pid", cartsControl.updateQuantity.bind(cartsControl));
+cartsRouter.put("/:cid/products/:pid", cartsController.updateQuantityProductFromCart.bind(cartsController));
 
-//elimina el producto 
-cartsRouter.delete("/:cid/products/:pid", cartsControl.deleteThisProduct.bind(cartsControl));
+cartsRouter.put("/:cid", cartsController.updateCart.bind(cartsController));
 
-//vacia 
-cartsRouter.delete("/:cid", cartsControl.cleanCart.bind(cartsControl));
+cartsRouter.delete("/:cid/products/:pid", cartsController.deleteProductFromCart.bind(cartsController));
+
+cartsRouter.delete("/:cid", cartsController.deleteProductsFromCart.bind(cartsController));
+
+cartsRouter.post("/:cid/purchase", (req, res, next) => {
+    console.log('Ruta de compra accedida');
+    next();
+  }, passportCall("jwt"), cartsController.createPurchaseTicket.bind(cartsController));
+
+
 export default cartsRouter;

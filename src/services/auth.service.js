@@ -13,7 +13,7 @@ class AuthenticationService {
             if(!user){
                 return null;
             }
-            const token = jwt.sign({id:user._id, email: user.email, rol: user.rol}, this.secretKey, {expiresIn:'13h'});
+            const token = jwt.sign({id:user._id, email: user.email, role: user.role}, this.secretKey, {expiresIn:'24h'});
             return {user, token}
     }
     async githubCallback(profile){
@@ -33,7 +33,7 @@ class AuthenticationService {
                     email:profile._json.email,
                     age:100,
                     password:"",
-                    rol: "usuario"
+                    role: "usuario"
                 })
             } 
             return user;

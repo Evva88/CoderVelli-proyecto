@@ -1,29 +1,20 @@
 import express from "express";
 import ProductManager from "../dao/ProductManager.js";
 import CartManager from "../dao/cartManager.js";
-
-const router = express.Router();
-const PM = new ProductManager();
-const CM = new CartManager()
+import cartController from "../controllers/cart.controller.js";
 
 const checkSession = (req, res, next) => {
-  console.log(
-    "Verificando req.session.user en checkSession:",
-    req.session.user
-  );
+  console.log('Checking session:', req.session);
+
   if (req.session && req.session.user) {
+    console.log('Session exists:', req.session.user);
     next();
   } else {
+    console.log('No session found, redirecting to /login');
     res.redirect("/login");
   }
 };
-
 const checkAlreadyLoggedIn = (req, res, next) => {
-  console.log("Verificando req.session en checkAlreadyLoggedIn:", req.session);
-  console.log(
-    "Verificando req.session.user en checkAlreadyLoggedIn:",
-    req.session.user
-  );
   if (req.session && req.session.user) {
     console.log("Usuario ya autenticado, redirigiendo a /profile");
     res.redirect("/profile");
@@ -33,32 +24,34 @@ const checkAlreadyLoggedIn = (req, res, next) => {
   }
 };
 
+const viewsRouter = express.Router();
+const PM = new ProductManager();
+const CM = new CartManager();
 
-router.get("/", async (req, res) => {
+viewsRouter.get("/", checkSession, async (req, res) => {
   const products = await PM.getProducts(req.query);
-  res.render("login");
+  res.render("home", { products});
 });
 
-
-router.get("/products", async (req, res) => {
+viewsRouter.get("/products", checkSession, async (req, res) => {
   const products = await PM.getProducts(req.query);
   const user = req.session.user;
-  res.render("products", {products, user});
+  
+  console.log(user);
+  res.render("products", { products, user });
 });
 
-
-router.get("/products/:pid", async (req, res) => {
+viewsRouter.get("/products/:pid", async (req, res) => {
   const pid = req.params.pid;
   const product = await PM.getProductById(pid);
-  if (product){
-  res.render("productDetail", { product });
+  if (product) {
+    res.render("productDetail", { product });
   } else {
-    res.status(404).send({status:"error", message:"Producto no encontrado"})
+    res.status(404).send({ status: "error", message: "Product not found." });
   }
 });
 
-
-router.get("/carts/:cid", async (req, res) => {
+viewsRouter.get("/carts/:cid", async (req, res) => {
   const cid = req.params.cid;
   const cart = await CM.getCart(cid);
 
@@ -73,44 +66,51 @@ router.get("/carts/:cid", async (req, res) => {
   }
 });
 
+viewsRouter.post("/carts/:cid/purchase", async (req, res) => {
+  const cid = req.params.cid;
+  cartController.getPurchase(req, res, cid);
+});
 
-router.get("/realtimeproducts", (req, res) => {
+viewsRouter.get("/realtimeproducts", (req, res) => {
   res.render("realTimeProducts");
 });
 
-
-router.get("/chat", (req, res) => {
+viewsRouter.get("/chat", (req, res) => {
   res.render("chat");
 });
 
-
-router.get("/login",checkAlreadyLoggedIn, async (req, res) => {
+viewsRouter.get("/login", checkAlreadyLoggedIn, (req, res) => {
   res.render("login");
 });
 
-
-router.get("/register",checkAlreadyLoggedIn, async (req, res) => {
+viewsRouter.get("/register", checkAlreadyLoggedIn, (req, res) => {
   res.render("register");
 });
 
+viewsRouter.get("/profile", checkSession, (req, res) => {
+  console.log('Inside /profile route');
 
-router.get("/profile",checkSession, (req, res) => {
   const userData = req.session.user;
-  res.render("profile", {user:userData});
+  console.log('User data:', userData);
+
+  res.render("profile", { user: userData });
 });
 
-
-router.get("/restore", checkSession, (req, res) => {
+viewsRouter.get("/restore", async (req, res) => {
   res.render("restore");
 });
 
-router.get("/faillogin", (req, res) =>{
+viewsRouter.get("/faillogin", (req, res) => {
   res.status(401).json({
-      status:"error",
-      message: "Error en el ingreso al sitio con ese mail y contraseña"
+    status: "error",
+    message: "Login failed. Invalid username or password.",
   });
+});
 
-})
-
-
-export default router;
+viewsRouter.get("/failregister", async (req, res) => {
+  res.send({
+    status: "Error",
+    message: "Error! No se pudo registar el Usuario!",
+  });
+});
+export default viewsRouter;
