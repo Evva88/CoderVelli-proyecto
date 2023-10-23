@@ -6,7 +6,7 @@ import UserController from "../controllers/userController.js";
 import AuthController from "../controllers/authController.js";
 import errorHandler from "../services/errors/errorsHandler.js";
 
-const PRIVATE_KEY = "CARAMELO_DE_LIMON";
+const PRIVATE_KEY = "GALL2T1TAD2L1MON";
 
 const serviceRouter = express.Router();
 const UM = new UserManager();
